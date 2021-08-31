@@ -1,17 +1,19 @@
 library(lpSolveAPI)
 library(tidyverse)
+judgevotes <- 5
+players <- 7
 {
- data <-  data.frame(Judge = rep(c(rep("A",5),rep("B",5)),7),
-                     Player =c(rep("Libba",10),rep("Macrae",10),rep("Bont",10),rep("Weightman",10),
-                     rep("Parish",10),rep("Naughton",10),rep("Ridley",10)),
-                     Votes = rep(1:5,14),
-                     Libba = c(rep(1:5,2),rep(0,60)),
-                     Macrae = c(rep(0,10),rep(1:5,2),rep(0,50)),
-                     Bont = c(rep(0,20),rep(1:5,2),rep(0,40)),
-                     Weightman = c(rep(0,30),rep(1:5,2),rep(0,30)),
-                     Parish = c(rep(0,40),rep(1:5,2),rep(0,20)),
-                     Naughton = c(rep(0,50),rep(1:5,2),rep(0,10)),
-                     Ridley = c(rep(0,60),rep(1:5,2)))
+ data <-  data.frame(Judge = rep(c(rep("A",judgevotes),rep("B",judgevotes)),players),
+                     Player =c(rep("Libba",judgevotes*2),rep("Macrae",judgevotes*2),rep("Bont",judgevotes*2),rep("Weightman",judgevotes*2),
+                     rep("Parish",judgevotes*2),rep("Naughton",judgevotes*2),rep("Ridley",judgevotes*2)),
+                     Votes = rep(1:judgevotes,players*2),
+                     Libba = c(rep(1:judgevotes,2),rep(0,(players-1)*judgevotes*2)),
+                     Macrae = c(rep(0,judgevotes*2),rep(1:judgevotes,2),rep(0,(players-2)*judgevotes*2)),
+                     Bont = c(rep(0,judgevotes*2*2),rep(1:judgevotes,2),rep(0,(players-3)*judgevotes*2)),
+                     Weightman = c(rep(0,judgevotes*2*3),rep(1:judgevotes,2),rep(0,(players-4)*judgevotes*2)),
+                     Parish = c(rep(0,judgevotes*2*4),rep(1:judgevotes,2),rep(0,(players-5)*judgevotes*2)),
+                     Naughton = c(rep(0,judgevotes*2*5),rep(1:judgevotes,2),rep(0,(players-6)*judgevotes*2)),
+                     Ridley = c(rep(0,judgevotes*2*6),rep(1:judgevotes,2)))
 
   knapsack <- make.lp(0, nrow(data))
 
