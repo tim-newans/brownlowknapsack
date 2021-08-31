@@ -1,4 +1,5 @@
 library(lpSolveAPI)
+library(tidyverse)
 {
  data <-  data.frame(Judge = rep(c(rep("A",5),rep("B",5)),7),
                      Player =c(rep("Libba",10),rep("Macrae",10),rep("Bont",10),rep("Weightman",10),
@@ -10,8 +11,7 @@ library(lpSolveAPI)
                      Weightman = c(rep(0,30),rep(1:5,2),rep(0,30)),
                      Parish = c(rep(0,40),rep(1:5,2),rep(0,20)),
                      Naughton = c(rep(0,50),rep(1:5,2),rep(0,10)),
-                     Ridley = c(rep(0,60),rep(1:5,2)),
-                     Ob = rep(0,70))
+                     Ridley = c(rep(0,60),rep(1:5,2)))
 
   knapsack <- make.lp(0, nrow(data))
 
@@ -76,13 +76,27 @@ library(lpSolveAPI)
     add.constraint(knapsack,2*sol-1,"<=", sum(sol)-1)
     rc<-solve(knapsack)
     if (rc!=0) break;
-    if (get.objective(knapsack)<obj0-1e-6) break;
+    if (get.objective(knapsack)<obj0-1e-1) break;
   }
   sols  
 }
 
 ## Get the players on the team
-team_select <- subset(as.data.frame(data, sol = sols[1]), sol == 1)
-team_select$sol <- NULL
-team_select 
 
+full_team <- subset(as.data.frame(data), unlist(sols[1]) == 1)
+full_team <- full_team %>% select(-Judge) %>% arrange(Player,Votes)
+full_team$Sol <- paste(paste(full_team$Player,collapse = ""),paste(full_team$Votes,collapse = ""))
+full_team$SolID <- 1
+
+for (i in 2:length(sols)) {
+  team_select <- subset(as.data.frame(data), unlist(sols[i]) == 1)
+  team_select <- team_select %>% select(-Judge) %>% arrange(Player,Votes)
+  team_select$Sol <- paste(paste(team_select$Player,collapse = ""),paste(team_select$Votes,collapse = ""))
+  team_select$SolID <- i
+  full_team <- bind_rows(full_team, team_select)
+}
+
+unique <- full_team[!duplicated(full_team %>% select(-SolID)),]
+nested_unique <- unique %>%
+  select(Player,Votes,SolID) %>%
+  nest(data = c(Player,Votes))
